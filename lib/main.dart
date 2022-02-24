@@ -20,19 +20,32 @@ class MyApp extends StatelessWidget {
       // )
       home: Scaffold(
         appBar: AppBar(
-          centerTitle: false,
-          title: Text("hello, title!")
+          centerTitle: true,
+          title: Text("hello, title!"),
+          leading: Icon(Icons.star),
+          actions: [
+            Icon(Icons.account_box),
+            Icon(Icons.comment),
+          ],
         ),
-        body: Align(
-          alignment: Alignment.bottomCenter,
-          child: Container(
-            child: Text('hello!!!'),
-            width: double.infinity, height: 50, margin: EdgeInsets.all(20),
-            padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.black),
-              color: Colors.black12,
-            ),
+        body: SizedBox(
+          child: Column(
+            children: [
+              const Text('안녕!',
+                style: TextStyle(
+                  color: Colors.red,
+                  backgroundColor: Colors.cyan,
+                  fontFamily: "D2Coding",
+                  fontWeight: FontWeight.w700,
+                  fontSize: 100,
+                ),
+              ),
+              TextButton(
+                child: Text('버튼!!!'),
+                onPressed: (){},
+              ),
+              IconButton(onPressed: (){}, icon: Icon(Icons.star))
+            ],
           ),
         ),
         bottomNavigationBar: BottomAppBar(
