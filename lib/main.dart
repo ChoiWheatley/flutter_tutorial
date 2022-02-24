@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_projects/memo_delegate.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,48 +19,40 @@ class MyApp extends StatelessWidget {
       //   // 자식 위젯 생성
       //   child: Container(width: 50, height: 50, color: Colors.blue)
       // )
-      home: Scaffold(
-        appBar: AppBar(
-          centerTitle: true,
-          title: Text("hello, title!"),
-          leading: Icon(Icons.star),
-          actions: [
-            Icon(Icons.account_box),
-            Icon(Icons.comment),
-          ],
-        ),
-        body: SizedBox(
-          child: Column(
-            children: [
-              const Text('안녕!',
-                style: TextStyle(
-                  color: Colors.red,
-                  backgroundColor: Colors.cyan,
-                  fontFamily: "D2Coding",
-                  fontWeight: FontWeight.w700,
-                  fontSize: 100,
-                ),
+      home: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text("Monglle",
+              style: TextStyle(
+                color: Color(0xff49453E),
+                fontSize: 50,
+                fontFamily: 'Roboto',
+                fontWeight: FontWeight.bold
               ),
-              TextButton(
-                child: Text('버튼!!!'),
-                onPressed: (){},
-              ),
-              IconButton(onPressed: (){}, icon: Icon(Icons.star))
-            ],
-          ),
-        ),
-        bottomNavigationBar: BottomAppBar(
-          child: Padding(
-            padding: const EdgeInsets.all(100.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: const[
-                Icon(Icons.phone),
-                Icon(Icons.message),
-                Icon(Icons.contact_page),
-              ],
             ),
+            centerTitle: false,
+            backgroundColor: Colors.white,
+            elevation: 0,
           ),
+          body: Column(
+            children: [
+              MemoDelegate(
+                folderName: 'Folder!',
+                memoName: [
+                  'memo1',
+                  'memo1',
+                  'memo1',
+                  'memo1',
+                  'memo1',
+                  'memo1',
+                  'memo1',
+                  'memo1',
+                  'memo1',
+                ]
+              ),
+            ],
+          )
         ),
       )
     );
