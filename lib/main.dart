@@ -23,14 +23,17 @@ class MyApp extends StatelessWidget {
           centerTitle: false,
           title: Text("hello, title!")
         ),
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Icon(Icons.star),
-            Icon(Icons.star),
-            Icon(Icons.star),
-          ],
+        body: Align(
+          alignment: Alignment.bottomCenter,
+          child: Container(
+            child: Text('hello!!!'),
+            width: double.infinity, height: 50, margin: EdgeInsets.all(20),
+            padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.black),
+              color: Colors.black12,
+            ),
+          ),
         ),
         bottomNavigationBar: BottomAppBar(
           child: Padding(
