@@ -2,7 +2,14 @@ import 'package:flutter/material.dart';
 // import 'package:flutter/services.dart';
 
 void main() {
-  runApp(MyApp());
+  /// MaterialApp 을 main함수쪽으로 빼내야 다이얼로그가 뜬다.
+  /// 왜냐고? context라는 부모위젯의 정보를 담고있는 변수인데,
+  /// context를 인자로 받는 함수 몇개가 있다. 대표적으로 showDialog가 있는데,
+  /// 이 함수는 부모로 MaterialApp을 필요로 한다. 그래서 main함수
+  /// 에서 MaterialApp의 자식으로 MyApp을 정의해야만 한다.
+  runApp(MaterialApp(
+    home: MyApp()
+  ));
 }
 
 /// StatefulWidget : state문법을 사용하면 자료를 보관할 수 있다.
@@ -30,18 +37,35 @@ class _MyAppState extends State<MyApp> {
     LikeUserWidget('굼벵이'),
     LikeUserWidget('좋아연'),
     LikeUserWidget('승현티비'),
+    LikeUserWidget('Cheater', like: 1000,),
   ];
 
-  @override Widget build(BuildContext context) { return MaterialApp(
-      home: Scaffold(
+  @override Widget build(BuildContext context) {
+    return Scaffold(
+      /// Builder는 context 생성기임. 아래의 floatingActionButton은
+      /// 부모로 Scaffold - MaterialApp 모두를 갖게된다.
+        floatingActionButton: Builder(
+          builder: (cntxt) {
+            return FloatingActionButton(
+              child: Text('click'),
+              onPressed: (){
+                print(cntxt); /// cntxt는 Builder-Scaffold-MaterialApp 순으로 Ancestor를 갖는다.
+                showDialog(context: cntxt, builder: (context){
+                  return Dialog(
+                    child: Text('안녕!'),
+                  );
+                });
+              },
+            );
+          }
+        ),
         appBar: AppBar(
           title: Text(appBarName),
         ),
         body: ListView(
           children: users,
         ),
-      ),
-    );
+      );
   }
 }
 class LikeUserWidget extends StatefulWidget{
