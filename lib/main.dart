@@ -9,57 +9,23 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // MaterialApp : google이 제공한 Material 앱 스타일을 제공한다.
-    // Cupertino* : apple 느낌의 앱 스타일을 제공한다.
+    /// Flexible: `flex` 값에 배수를 가지고 비율을 지정할 수 있다.
+    /// Expanded: `flex`를 1만큼 갖는다. 물론 따로 설정할 수도 있기는 하다.
     return MaterialApp(
-      // home: Text("hello, world 앙뇽!")
-      // home: Image.asset('assets/madeline.png') // pubspec.yml 파일에 `assets` 디렉터리 등록 필수
-      // home: Center(
-      //   // 자식 위젯 생성
-      //   child: Container(width: 50, height: 50, color: Colors.blue)
-      // )
       home: Scaffold(
-        appBar: AppBar(
-          centerTitle: true,
-          title: Text("hello, title!"),
-          leading: Icon(Icons.star),
-          actions: [
-            Icon(Icons.account_box),
-            Icon(Icons.comment),
-          ],
-        ),
-        body: SizedBox(
-          child: Column(
-            children: [
-              const Text('안녕!',
-                style: TextStyle(
-                  color: Colors.red,
-                  backgroundColor: Colors.cyan,
-                  fontFamily: "D2Coding",
-                  fontWeight: FontWeight.w700,
-                  fontSize: 100,
-                ),
-              ),
-              TextButton(
-                child: Text('버튼!!!'),
-                onPressed: (){},
-              ),
-              IconButton(onPressed: (){}, icon: Icon(Icons.star))
-            ],
-          ),
-        ),
-        bottomNavigationBar: BottomAppBar(
-          child: Padding(
-            padding: const EdgeInsets.all(100.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: const[
-                Icon(Icons.phone),
-                Icon(Icons.message),
-                Icon(Icons.contact_page),
-              ],
+        appBar: AppBar(),
+        body: Row(
+          children: [
+            Expanded(
+              child: Container(color: Colors.blue,),
             ),
-          ),
+            Flexible(
+              child: Container(color: Colors.green,),flex: 5,
+            ),
+            Flexible(
+              child: Container(color: Colors.red,),flex: 5,
+            ),
+          ],
         ),
       )
     );
