@@ -18,48 +18,99 @@ class MyApp extends StatefulWidget{
   State<MyApp> createState() => _MyAppState();
 }
 class _MyAppState extends State<MyApp> {
-  var a = 0;
-  final appBarName = "연락처앱";
-  final names = const["최승현", "김영숙", "홍길동", "피자집", "콩콩콩", "안녕!", "니아렁", "hello"];
+  final appBarName = "따봉앱";
+  LikeUserWidget? likeUser;
+  final users=[
+    LikeUserWidget('홍길동'),
+    LikeUserWidget('최승현'),
+    LikeUserWidget('옴뇸뇸'),
+    LikeUserWidget('고길동'),
+    LikeUserWidget('상도곱창'),
+    LikeUserWidget('피라냐'),
+    LikeUserWidget('굼벵이'),
+    LikeUserWidget('좋아연'),
+    LikeUserWidget('승현티비'),
+  ];
 
   @override Widget build(BuildContext context) { return MaterialApp(
       home: Scaffold(
-        /// 우측 하단에 떠있는 버튼에 대한 프리셋이 있다.
-        floatingActionButton: FloatingActionButton(
-          /// Text 렌더링 강제하기는 다음 시간에
-          child: Text(a.toString()),
-          onPressed: (){
-            /// 버튼 누르면 여기 코드를 실행해준다.
-            // a++;
-            /// state를 바꾸어주는 메서드를 호출한다.
-            setState(() {
-              a++;
-            });
-          },
-        ),
         appBar: AppBar(
           title: Text(appBarName),
         ),
-        body: Container(
-          /// ListView 사용하면 스크롤바 생김. 스크롤 위치 감시도 가능, 안보이는 위젯
-          /// 메모리 절약
-          child: ListView.builder(
-            itemCount: names.length,
-            itemBuilder: (buildContext, i){
-              print('hello' + i.toString());
-              // return MyListItem(name: "name_" + i.toString(),);
-              /// ListTile을 쓰면 별도의 컴포넌트 만들 필요도 없이 바로 리스트에 필요한
-              /// 아이템을 정의할 수 있다.
-              return ListTile(
-                leading: Icon(Icons.account_circle),
-                title: Text(names[i] + (a + i).toString()),
-              );
-            },
-          ),
+        body: ListView(
+          children: users,
         ),
       ),
     );
   }
+}
+class LikeUserWidget extends StatefulWidget{
+  final LikeUser _likeUser;
+
+  LikeUserWidget(String? name, {int? like, Key? key})
+      : _likeUser = LikeUser(name, like: like), super(key: key);
+
+  @override
+  State<LikeUserWidget> createState() => _LikeUserWidgetState();
+}
+
+class _LikeUserWidgetState extends State<LikeUserWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 1,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(15, 3, 3, 3),
+              child: Text(widget._likeUser.like.toString()),
+            ),
+          ),
+          Expanded(
+            flex: 8,
+            child: Text(widget._likeUser.name,
+              textAlign: TextAlign.center,
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: TextButton(
+              child: Text('좋아연',
+                style: TextStyle(
+                  color: Colors.black,
+                ),
+              ),
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all<Color>(Colors.lightBlueAccent),
+              ),
+              onPressed: (){
+                setState(() {
+                  widget._likeUser.upvote();
+                });
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class LikeUser {
+  final String name;
+  int _like;  /// `_` 가 맨 앞에 붙으면 private
+
+  int get like {
+    return _like;
+  }
+  void upvote() {
+    _like++;
+  }
+  LikeUser(String? name, {int? like})
+      : name = name ?? '', _like = like ?? 0;
 }
 
 /// 나만의 위젯 만들기 - 클래스 버전.
