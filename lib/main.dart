@@ -1,54 +1,46 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
+  MyApp({Key? key}) : super(key: key);
+  var a = 0;
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
+        /// 우측 하단에 떠있는 버튼에 대한 프리셋이 있다.
+        floatingActionButton: FloatingActionButton(
+          /// Text 렌더링 강제하기는 다음 시간에
+          child: Text(a.toString()),
+          onPressed: (){
+            /// 버튼 누르면 여기 코드를 실행해준다.
+            a++;
+          },
+        ),
         appBar: AppBar(),
         body: Container(
           /// ListView 사용하면 스크롤바 생김. 스크롤 위치 감시도 가능, 안보이는 위젯
           /// 메모리 절약
-          child: ListView(
-            children: const [
-              MyListItem(name: '홍길동'),
-              MyListItem(name: '홍길동'),
-              MyListItem(name: '홍길동'),
-              MyListItem(name: '홍길동'),
-              MyListItem(name: '홍길동'),
-              MyListItem(name: '홍길동'),
-              MyListItem(name: '홍길동'),
-              MyListItem(name: '홍길동'),
-              MyListItem(name: '홍길동'),
-              MyListItem(name: '홍길동'),
-              MyListItem(name: '고길동'),
-              MyListItem(name: '최승현'),
-              MyListItem(name: '고길동'),
-              MyListItem(name: '최승현'),
-              MyListItem(name: '고길동'),
-              MyListItem(name: '최승현'),
-              MyListItem(name: '고길동'),
-              MyListItem(name: '최승현'),
-              MyListItem(name: '고길동'),
-              MyListItem(name: '최승현'),
-              MyListItem(name: '고길동'),
-              MyListItem(name: '최승현'),
-              MyListItem(name: '고길동'),
-              MyListItem(name: '최승현'),
-              MyListItem(name: '고길동'),
-              MyListItem(name: '최승현'),
-              MyListItem(name: '고길동'),
-              MyListItem(name: '최승현'),
-              MyListItem(name: '고길동'),
-              MyListItem(name: '최승현'),
-            ],
-          )
+          child: ListView.builder(itemCount: 100,
+            itemBuilder: (buildContext, i){
+              print('hello' + i.toString());
+              // return MyListItem(name: "name_" + i.toString(),);
+              /// ListTile을 쓰면 별도의 컴포넌트 만들 필요도 없이 바로 리스트에 필요한
+              /// 아이템을 정의할 수 있다.
+              return ListTile(
+                autofocus: true,
+                enabled: true,
+                hoverColor: Colors.amber,
+                focusColor: Colors.yellow,
+                selectedColor: Colors.yellowAccent,
+                leading: Icon(Icons.account_circle),
+                title: Text('홍길동' + i.toString()),
+              );
+            },
+          ),
         ),
       ),
     );
