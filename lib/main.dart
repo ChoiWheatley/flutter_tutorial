@@ -86,6 +86,16 @@ class _MyAppState extends State<MyApp> {
         ),
         appBar: AppBar(
           title: Text(appBarName + _users.length.toString()),
+          actions: [
+            IconButton(
+                onPressed: (){
+                  setState(() {
+                    _users.sort();
+                  });
+                },
+                icon: Icon(Icons.sort)
+            ),
+          ],
         ),
         body: ListView.builder(
             itemCount: _users.length,
@@ -95,7 +105,7 @@ class _MyAppState extends State<MyApp> {
       );
   }
 }
-class LikeUserWidget extends StatefulWidget{
+class LikeUserWidget extends StatefulWidget implements Comparable<LikeUserWidget>{
   final LikeUser _likeUser;
   /// deleteUser라는 이름의 함수 포인터를 정의함으로써 추상 인터페이스를 정의한다.
   /// 이 위젯을 사용하는 객체가 deleteUser를 구현하도록 만드는 것이다.
@@ -110,6 +120,11 @@ class LikeUserWidget extends StatefulWidget{
 
   @override
   State<LikeUserWidget> createState() => _LikeUserWidgetState();
+
+  @override
+  int compareTo(LikeUserWidget other) {
+    return _likeUser.compareTo(other._likeUser);
+  }
 }
 
 class _LikeUserWidgetState extends State<LikeUserWidget> {
@@ -174,7 +189,7 @@ class _LikeUserWidgetState extends State<LikeUserWidget> {
   }
 }
 
-class LikeUser {
+class LikeUser implements Comparable<LikeUser>{
   final String name;
   int _like;  /// `_` 가 맨 앞에 붙으면 private
 
@@ -186,6 +201,12 @@ class LikeUser {
   }
   LikeUser(String? name, {int? like})
       : name = name ?? '', _like = like ?? 0;
+
+  @override
+  int compareTo(LikeUser other) {
+    return name.compareTo(other.name);
+  }
+
 }
 
 /// 나만의 위젯 만들기 - 클래스 버전.
