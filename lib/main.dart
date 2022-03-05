@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+import 'dart:math';
 // import 'package:flutter/services.dart';
 
 void main() {
@@ -27,16 +30,16 @@ class MyApp extends StatefulWidget{
 class _MyAppState extends State<MyApp> {
   final appBarName = "따봉앱";
   late final List<LikeUserWidget> _users=[
-    LikeUserWidget('홍길동', deleteFunc: deleteUser,),
-    LikeUserWidget('최승현', deleteFunc: deleteUser,),
-    LikeUserWidget('옴뇸뇸', deleteFunc: deleteUser,),
-    LikeUserWidget('고길동', deleteFunc: deleteUser,),
-    LikeUserWidget('상도곱창', deleteFunc: deleteUser,),
-    LikeUserWidget('피라냐', deleteFunc: deleteUser,),
-    LikeUserWidget('굼벵이', deleteFunc: deleteUser,),
-    LikeUserWidget('좋아연', deleteFunc: deleteUser,),
-    LikeUserWidget('승현티비', deleteFunc: deleteUser,),
-    LikeUserWidget('Cheater', like: 1000, deleteFunc: deleteUser,),
+    LikeUserWidget.likeUser(LikeUser('홍길동', phone: 01012345678), deleteFunc: deleteUser,),
+    LikeUserWidget.likeUser(LikeUser('최승현', phone: 01012345678), deleteFunc: deleteUser,),
+    LikeUserWidget.likeUser(LikeUser('옴뇸뇸', phone: 01012345678), deleteFunc: deleteUser,),
+    LikeUserWidget.likeUser(LikeUser('고길동', phone: 01012345678), deleteFunc: deleteUser,),
+    LikeUserWidget.likeUser(LikeUser('상도곱창', phone: 01012345678), deleteFunc: deleteUser,),
+    LikeUserWidget.likeUser(LikeUser('피라냐', phone: 01012345678), deleteFunc: deleteUser,),
+    LikeUserWidget.likeUser(LikeUser('굼벵이', phone: 01012345678), deleteFunc: deleteUser,),
+    LikeUserWidget.likeUser(LikeUser('좋아연', phone: 01012345678), deleteFunc: deleteUser,),
+    LikeUserWidget.likeUser(LikeUser('승현티비', phone: 01012345678), deleteFunc: deleteUser,),
+    LikeUserWidget.likeUser(LikeUser('Cheater', like: 1000, phone: 01012345678), deleteFunc: deleteUser,),
   ];
 
   /// addUser와 deleteUser 인터페이스의 구현체는 MyApp에 있다. 이 객체는 MyDialog의 addUser
@@ -52,7 +55,6 @@ class _MyAppState extends State<MyApp> {
   }
   /// delete 연산, users의 index를 통해 지우거나, 인스턴스를 아예 지워버리거나
   deleteUser(user) {
-    print('user is ' + user.toString());
     setState(() {
       /// index를 통해 지우는 방법
       if (user is int && user >= 0 && user < _users.length) {
@@ -75,7 +77,7 @@ class _MyAppState extends State<MyApp> {
             return FloatingActionButton(
               child: Text('click'),
               onPressed: (){
-                print(cntxt); /// cntxt는 Builder-Scaffold-MaterialApp 순으로 Ancestor를 갖는다.
+                // print(cntxt); /// cntxt는 Builder-Scaffold-MaterialApp 순으로 Ancestor를 갖는다.
                 showDialog(context: cntxt, builder: (cntxt){
                   /// 인터페이스 자체를 자식에게 보낼 수도 있다.
                   return MyDialog(addUser: addUser,);
@@ -143,10 +145,17 @@ class _LikeUserWidgetState extends State<LikeUserWidget> {
             ),
           ),
           Expanded(
-            flex: 8,
+            flex: 4,
             child: Text(widget._likeUser.name,
               textAlign: TextAlign.center,
             ),
+          ),
+          Expanded(
+            flex: 4,
+              child: Text(
+                widget._likeUser.phone.toPhoneString(divided: widget._likeUser.phoneDivide),
+                textAlign: TextAlign.center,
+              )
           ),
           Expanded(
             flex: 2,
@@ -176,7 +185,7 @@ class _LikeUserWidgetState extends State<LikeUserWidget> {
               onPressed: (){
                 // TODO: delete button pressed
                 var deleteFunc = widget._deleteUser;
-                print(deleteFunc.toString());
+                // print(deleteFunc.toString());
                 if (deleteFunc != null) {
                   deleteFunc(widget);
                 }
@@ -191,6 +200,8 @@ class _LikeUserWidgetState extends State<LikeUserWidget> {
 
 class LikeUser implements Comparable<LikeUser>{
   final String name;
+  final int phone;
+  final List<int> phoneDivide;
   int _like;  /// `_` 가 맨 앞에 붙으면 private
 
   int get like {
@@ -199,8 +210,8 @@ class LikeUser implements Comparable<LikeUser>{
   void upvote() {
     _like++;
   }
-  LikeUser(String? name, {int? like})
-      : name = name ?? '', _like = like ?? 0;
+  LikeUser(String? name, {int? like, int? phone, this.phoneDivide = const [3, 4, 4]})
+      : name = name ?? '', _like = like ?? 0, phone = phone ?? 0;
 
   @override
   int compareTo(LikeUser other) {
@@ -251,14 +262,21 @@ class MyDialog extends StatelessWidget {
   /// addUser라는 함수포인터를 정의함으로써 우리는 이 객체의 추상 인터페이스를 정의할 수 있다.
   final void Function(LikeUser)? _addUser;
   final _inputData = TextEditingController();   /// 유저가 텍스트필드에 입력한 데이터를 변수에 담을 수 있다.
+  final _inputPhone = TextEditingController();
 
   MyDialog({Function(LikeUser)? addUser, Key? key,})
       : _addUser = addUser, super(key: key);
 
+  _trySubmit(context) {
+    if (_inputData.text.isNotEmpty && _inputPhone.text.isNotEmpty) {
+      _submit();
+      _close(context);
+    }
+  }
   _submit() {
     /// 빈칸이면 완료 눌러도 추가 안 되게
     if (_inputData.text.isNotEmpty){
-      _addUser?.call(LikeUser(_inputData.text));
+      _addUser?.call(LikeUser(_inputData.text, phone: int.tryParse(_inputPhone.text)));
     }
   }
 
@@ -274,7 +292,7 @@ class MyDialog extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: SizedBox(
           width: 100,
-          height: 300,
+          height: 500,
           child: Column(
             children: [
               TextField(
@@ -282,13 +300,24 @@ class MyDialog extends StatelessWidget {
                 enabled: true,
                 autofocus: true,
                 onSubmitted: (text){
-                  _submit();
-                  _close(context);
+                  _trySubmit(context);
                   },
                 decoration: InputDecoration(
                     border: UnderlineInputBorder(),
                     hintText: 'new friend name here'
                 ),
+              ),
+              TextField(
+                keyboardType: TextInputType.number,
+                controller: _inputPhone,
+                enabled: true,
+                decoration: InputDecoration(
+                  border: UnderlineInputBorder(),
+                  hintText: '000-0000-0000',
+                ),
+                onSubmitted: (number) {
+                  _trySubmit(context);
+                },
               ),
               TextButton(
                 child: Text('완료'),
@@ -312,5 +341,56 @@ class MyDialog extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+extension on int {
+  // if the phone number is 010-8752-4037,
+  // divided will be [3, 4, 4], which will divide left-to-right cumulatively
+  String toPhoneString({required List<int> divided, delemeter = '.'}) {
+    // if the number is 123 and phoneDivide.last is 5,
+    // then padded with zero value will be '00123'
+    // final allString = toString();
+    // final last = divided.last;
+    // final digitOfFirstDelemeter = divided[divided.length-2];
+    // final digitOfFirstPhone = divided[divided.length-1] - digitOfFirstDelemeter;
+    //
+    // var ret = padWith(this ~/ pow(10, digitOfFirstDelemeter), digitOfFirstPhone, '0') + delemeter;
+    // for (var i = divided.length-2; i > 0; i--) {
+    //   ret += allString.substring(last - divided[i], last - divided[i-1]) + delemeter;
+    // }
+    // ret += allString.substring(last - divided[0]);
+
+    final sum = () {
+      var ret = 0;
+      for (var i in divided) {
+        ret += i;
+      }
+      return ret;
+    }();
+    final allString = padWith(this, sum, '0');
+    print(allString);
+    final firstDigit = sum - divided[0];
+    final firstPart = this ~/ pow(10, firstDigit);
+
+    var ret = padWith(firstPart, divided[0], '0') + delemeter;
+    var index = divided[0];
+    for (var i = 0; i < divided.length-1; i++) {
+      ret += allString.substring(index, index + divided[i+1]) + delemeter;
+      index += divided[i+1];
+    }
+    ret = ret.substring(0, ret.length-1);
+
+    return ret;
+  }
+  /// (10, 5) -> '00010'
+  String padWith(int origin, int digit, String pad) {
+    var ret = '';
+    var originDigit = origin.toString().length;
+    for (var i = 0; i < digit - originDigit; i++) {
+      ret += pad;
+    }
+    ret += origin.toString();
+    return ret;
   }
 }
