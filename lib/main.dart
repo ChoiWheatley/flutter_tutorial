@@ -26,25 +26,46 @@ class MyApp extends StatefulWidget{
 }
 class _MyAppState extends State<MyApp> {
   final appBarName = "따봉앱";
-  var users=[
-    LikeUserWidget('홍길동'),
-    LikeUserWidget('최승현'),
-    LikeUserWidget('옴뇸뇸'),
-    LikeUserWidget('고길동'),
-    LikeUserWidget('상도곱창'),
-    LikeUserWidget('피라냐'),
-    LikeUserWidget('굼벵이'),
-    LikeUserWidget('좋아연'),
-    LikeUserWidget('승현티비'),
-    LikeUserWidget('Cheater', like: 1000,),
+  late final List<LikeUserWidget> _users=[
+    LikeUserWidget('홍길동', deleteFunc: deleteUser,),
+    LikeUserWidget('최승현', deleteFunc: deleteUser,),
+    LikeUserWidget('옴뇸뇸', deleteFunc: deleteUser,),
+    LikeUserWidget('고길동', deleteFunc: deleteUser,),
+    LikeUserWidget('상도곱창', deleteFunc: deleteUser,),
+    LikeUserWidget('피라냐', deleteFunc: deleteUser,),
+    LikeUserWidget('굼벵이', deleteFunc: deleteUser,),
+    LikeUserWidget('좋아연', deleteFunc: deleteUser,),
+    LikeUserWidget('승현티비', deleteFunc: deleteUser,),
+    LikeUserWidget('Cheater', like: 1000, deleteFunc: deleteUser,),
   ];
 
-  // interface
+  /// addUser와 deleteUser 인터페이스의 구현체는 MyApp에 있다. 이 객체는 MyDialog의 addUser
+  /// 를 구현하고 LikeUserWidget의 delUser를 구현한다. 이 둘에 비해 MyApp 객체는 의존적이며,
+  /// 책임이 없다. 즉, MyDialog와 LikeUserWidget은 MyApp에 비해 더 중요하고 잘 바뀌지 않는
+  /// 정책을 담고, MyApp은 반대로 자주 바뀌는 구현체를 담게 되는 것이다.
+  ///
+  /// 상식에 벗어나는 것인가? 아니면 기존의 고정관념을 깨는 것인가?
   addUser(LikeUser user) {
     setState(() {
-      users.add(LikeUserWidget.likeUser(user));
+      _users.add(LikeUserWidget.likeUser(user, deleteFunc: deleteUser,));
     });
   }
+  /// delete 연산, users의 index를 통해 지우거나, 인스턴스를 아예 지워버리거나
+  deleteUser(user) {
+    print('user is ' + user.toString());
+    setState(() {
+      /// index를 통해 지우는 방법
+      if (user is int && user >= 0 && user < _users.length) {
+        _users.removeAt(user);
+      }
+      /// instance를 직접 지우는 방법
+      if (user is LikeUserWidget?) {
+        // TODO: 근데 이래도 되나? 포인트나 레퍼런스로 전달되겠지?
+        _users.remove(user);
+      }
+    });
+  }
+
   @override Widget build(BuildContext context) {
     return Scaffold(
       /// Builder는 context 생성기임. 아래의 floatingActionButton은
@@ -57,30 +78,35 @@ class _MyAppState extends State<MyApp> {
                 print(cntxt); /// cntxt는 Builder-Scaffold-MaterialApp 순으로 Ancestor를 갖는다.
                 showDialog(context: cntxt, builder: (cntxt){
                   /// 인터페이스 자체를 자식에게 보낼 수도 있다.
-                  return MyDialog(addUser);
+                  return MyDialog(addUser: addUser,);
                 });
               },
             );
           }
         ),
         appBar: AppBar(
-          title: Text(appBarName + users.length.toString()),
+          title: Text(appBarName + _users.length.toString()),
         ),
         body: ListView.builder(
-            itemCount: users.length,
+            itemCount: _users.length,
             itemBuilder: (context, idx){
-              return users[idx];
+              return _users[idx];
             })
       );
   }
 }
 class LikeUserWidget extends StatefulWidget{
   final LikeUser _likeUser;
+  /// deleteUser라는 이름의 함수 포인터를 정의함으로써 추상 인터페이스를 정의한다.
+  /// 이 위젯을 사용하는 객체가 deleteUser를 구현하도록 만드는 것이다.
+  /// 신기한 점은 함수 포인터를 사용하면 굳이 추상 클래스를 만들 필요가 없다는 점이다.
+  final void Function(Object?)? _deleteUser;
 
-  LikeUserWidget(String? name, {int? like, Key? key})
-      : _likeUser = LikeUser(name, like: like), super(key: key);
-  LikeUserWidget.likeUser(LikeUser newUser, {Key? key}) /// Constructor.name 식으로 생성자를 구분해야 함. 이름 똑같으면 망함.
-      : _likeUser = newUser, super(key: key);
+  // facade
+  LikeUserWidget(String? name, {Function(Object?)? deleteFunc, int? like, Key? key})
+      : _deleteUser = deleteFunc, _likeUser = LikeUser(name, like: like), super(key: key);
+  LikeUserWidget.likeUser(LikeUser newUser, {Function(Object?)? deleteFunc, Key? key}) /// Constructor.name 식으로 생성자를 구분해야 함. 이름 똑같으면 망함.
+      : _deleteUser = deleteFunc, _likeUser = newUser, super(key: key);
 
   @override
   State<LikeUserWidget> createState() => _LikeUserWidgetState();
@@ -122,6 +148,23 @@ class _LikeUserWidgetState extends State<LikeUserWidget> {
                 setState(() {
                   widget._likeUser.upvote();
                 });
+              },
+            ),
+          ),
+          Expanded(
+            child: TextButton(
+              child: Text('delete',
+                style: TextStyle(
+                  color: Colors.redAccent,
+                ),
+              ),
+              onPressed: (){
+                // TODO: delete button pressed
+                var deleteFunc = widget._deleteUser;
+                print(deleteFunc.toString());
+                if (deleteFunc != null) {
+                  deleteFunc(widget);
+                }
               },
             ),
           ),
@@ -184,10 +227,24 @@ var a = SizedBox(
 ///
 
 class MyDialog extends StatelessWidget {
-  final _addUser;
+  /// addUser라는 함수포인터를 정의함으로써 우리는 이 객체의 추상 인터페이스를 정의할 수 있다.
+  final void Function(LikeUser)? _addUser;
   final _inputData = TextEditingController();   /// 유저가 텍스트필드에 입력한 데이터를 변수에 담을 수 있다.
 
-  MyDialog(addUser, {Key? key}) : _addUser = addUser, super(key: key);
+  MyDialog({Function(LikeUser)? addUser, Key? key,})
+      : _addUser = addUser, super(key: key);
+
+  _submit() {
+    /// 빈칸이면 완료 눌러도 추가 안 되게
+    if (_inputData.text.isNotEmpty){
+      _addUser?.call(LikeUser(_inputData.text));
+    }
+  }
+
+  static _close(context) {
+    /// 알아서 닫히게
+    Navigator.of(context, rootNavigator: true).pop();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -203,6 +260,10 @@ class MyDialog extends StatelessWidget {
                 controller: _inputData,  /// TextField에 작성한 내용을 담는 컨트롤러 등록.
                 enabled: true,
                 autofocus: true,
+                onSubmitted: (text){
+                  _submit();
+                  _close(context);
+                  },
                 decoration: InputDecoration(
                     border: UnderlineInputBorder(),
                     hintText: 'new friend name here'
@@ -215,14 +276,14 @@ class MyDialog extends StatelessWidget {
                   /// 부모 state를 자식이 수정하려면
                   /// 1. 부모에 수정하는 함수 만들기
                   /// 2. 자식으로 보내기 + 자식에서 함수 등록하기
-                  _addUser(LikeUser(_inputData.text));
-                  Navigator.of(context, rootNavigator: true).pop();
+                  _submit();
+                  _close(context);
                 },
               ),
               TextButton(
                 child: Text('취소'),
                 onPressed: (){
-                  Navigator.of(context, rootNavigator: true).pop();
+                  _close(context);
                 },
               ),
             ],
