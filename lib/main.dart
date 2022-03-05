@@ -26,8 +26,7 @@ class MyApp extends StatefulWidget{
 }
 class _MyAppState extends State<MyApp> {
   final appBarName = "따봉앱";
-  LikeUserWidget? likeUser;
-  final users=[
+  var users=[
     LikeUserWidget('홍길동'),
     LikeUserWidget('최승현'),
     LikeUserWidget('옴뇸뇸'),
@@ -40,6 +39,12 @@ class _MyAppState extends State<MyApp> {
     LikeUserWidget('Cheater', like: 1000,),
   ];
 
+  // interface
+  addUser(LikeUser user) {
+    setState(() {
+      users.add(LikeUserWidget.likeUser(user));
+    });
+  }
   @override Widget build(BuildContext context) {
     return Scaffold(
       /// Builder는 context 생성기임. 아래의 floatingActionButton은
@@ -50,21 +55,22 @@ class _MyAppState extends State<MyApp> {
               child: Text('click'),
               onPressed: (){
                 print(cntxt); /// cntxt는 Builder-Scaffold-MaterialApp 순으로 Ancestor를 갖는다.
-                showDialog(context: cntxt, builder: (context){
-                  return Dialog(
-                    child: Text('안녕!'),
-                  );
+                showDialog(context: cntxt, builder: (cntxt){
+                  /// 인터페이스 자체를 자식에게 보낼 수도 있다.
+                  return MyDialog(addUser);
                 });
               },
             );
           }
         ),
         appBar: AppBar(
-          title: Text(appBarName),
+          title: Text(appBarName + users.length.toString()),
         ),
-        body: ListView(
-          children: users,
-        ),
+        body: ListView.builder(
+            itemCount: users.length,
+            itemBuilder: (context, idx){
+              return users[idx];
+            })
       );
   }
 }
@@ -73,6 +79,8 @@ class LikeUserWidget extends StatefulWidget{
 
   LikeUserWidget(String? name, {int? like, Key? key})
       : _likeUser = LikeUser(name, like: like), super(key: key);
+  LikeUserWidget.likeUser(LikeUser newUser, {Key? key}) /// Constructor.name 식으로 생성자를 구분해야 함. 이름 똑같으면 망함.
+      : _likeUser = newUser, super(key: key);
 
   @override
   State<LikeUserWidget> createState() => _LikeUserWidgetState();
@@ -172,3 +180,55 @@ var a = SizedBox(
 
 /// 커스텀 위젯의 단점 = state 관리가 어렵다 -> 나중에 강의함.
 /// 큰 페이지, 재사용 많은 UI만 커스텀 할 것
+///
+///
+
+class MyDialog extends StatelessWidget {
+  final _addUser;
+  final _inputData = TextEditingController();   /// 유저가 텍스트필드에 입력한 데이터를 변수에 담을 수 있다.
+
+  MyDialog(addUser, {Key? key}) : _addUser = addUser, super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: SizedBox(
+          width: 100,
+          height: 300,
+          child: Column(
+            children: [
+              TextField(
+                controller: _inputData,  /// TextField에 작성한 내용을 담는 컨트롤러 등록.
+                enabled: true,
+                autofocus: true,
+                decoration: InputDecoration(
+                    border: UnderlineInputBorder(),
+                    hintText: 'new friend name here'
+                ),
+              ),
+              TextButton(
+                child: Text('완료'),
+                onPressed: (){
+                  /// 부모 객체에 있는 리스트에 1 추가해보자.
+                  /// 부모 state를 자식이 수정하려면
+                  /// 1. 부모에 수정하는 함수 만들기
+                  /// 2. 자식으로 보내기 + 자식에서 함수 등록하기
+                  _addUser(LikeUser(_inputData.text));
+                  Navigator.of(context, rootNavigator: true).pop();
+                },
+              ),
+              TextButton(
+                child: Text('취소'),
+                onPressed: (){
+                  Navigator.of(context, rootNavigator: true).pop();
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
